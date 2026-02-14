@@ -109,7 +109,6 @@ def depthFirstSearch(problem:SearchProblem)->List[Direction]:
         state, path = fringe.pop()
 
         if problem.isGoalState(state):
-            print("Final path:", path)
             return path
 
         if state not in visited:
@@ -140,7 +139,6 @@ def breadthFirstSearch(problem:SearchProblem)->List[Direction]:
         state, path = fringe.pop()
 
         if problem.isGoalState(state):
-            print("Final path:", path)
             return path
 
         if state not in visited:
@@ -159,8 +157,31 @@ def uniformCostSearch(problem:SearchProblem)->List[Direction]:
     '''
         INSÉREZ VOTRE SOLUTION À LA QUESTION 3 ICI
     '''
+    fringe = util.PriorityQueue()
+    start = problem.getStartState()
 
-    util.raiseNotDefined()
+    fringe.push((start, [], 0), 0)
+
+    # best known cost to each state
+    best_cost = {start: 0}
+
+    while not fringe.isEmpty():
+        state, path, current_cost = fringe.pop()
+
+        if state not in best_cost or current_cost != best_cost[state]:
+            continue
+
+        if problem.isGoalState(state):
+            return path
+
+        for successor, action, cost in problem.getSuccessors(state):
+            new_cost = current_cost + cost
+
+            if successor not in best_cost or new_cost < best_cost[successor]:
+                best_cost[successor] = new_cost
+                fringe.push((successor, path + [action], new_cost), new_cost)
+
+    return []
 
 def nullHeuristic(state:GameState, problem:SearchProblem=None)->List[Direction]:
     """
@@ -174,8 +195,32 @@ def aStarSearch(problem:SearchProblem, heuristic=nullHeuristic)->List[Direction]
     '''
         INSÉREZ VOTRE SOLUTION À LA QUESTION 4 ICI
     '''
+    fringe = util.PriorityQueue()
+    start = problem.getStartState()
 
-    util.raiseNotDefined()
+    start_h = heuristic(start, problem)
+    fringe.push((start, [], 0), 0 + start_h)
+
+    best_cost = {start: 0}
+
+    while not fringe.isEmpty():
+        state, path, g_cost = fringe.pop()
+
+        if state not in best_cost or g_cost != best_cost[state]:
+            continue
+
+        if problem.isGoalState(state):
+            return path
+
+        for successor, action, cost in problem.getSuccessors(state):
+            new_g = g_cost + cost
+
+            if successor not in best_cost or new_g < best_cost[successor]:
+                best_cost[successor] = new_g
+                f = new_g + heuristic(successor, problem)
+                fringe.push((successor, path + [action], new_g), f)
+
+    return []
 
 
 # Abbreviations
