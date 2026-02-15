@@ -399,7 +399,7 @@ def cornersHeuristic(state, problem):
         
     # return cost
 
-    return max(util.manhattanDistance(position, c) for c in unvisitedCorners)
+    return max(util.manhattanDistance(position, corner) for corner in unvisitedCorners)
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -492,11 +492,32 @@ def foodHeuristic(state, problem: FoodSearchProblem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
+    foodList = foodGrid.asList()
 
-    '''
-        INSÉREZ VOTRE SOLUTION À LA QUESTION 7 ICI
-    '''
+    if not foodList:
+        return 0
 
+    cache = problem.heuristicInfo
 
-    return 0
+    def mazeDistance(pos1, pos2):
+        key = (pos1, pos2)
+        reverseKey = (pos2, pos1)
+        if key in cache:
+            return cache[key]
+        if reverseKey in cache:
+            return cache[reverseKey]
+
+        prob = PositionSearchProblem(
+            problem.startingGameState,
+            start=pos1,
+            goal=pos2,
+            warn=False,
+            visualize=False
+        )
+        dist = len(search.bfs(prob))
+        cache[key] = dist
+        return dist
+
+    return max(mazeDistance(position, food) for food in foodList)
+    # return max(util.manhattanDistance(position, food) for food in foodList)
 
